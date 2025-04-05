@@ -1,13 +1,19 @@
 import React, { createContext, useState, useCallback, ReactNode } from 'react';
 import { AetherApp } from '@aether/core';
 
+export type LoadingState = 'idle' | 'initializing' | 'loading-assets' | 'ready' | 'error';
+
 interface AetherContextType {
   app: AetherApp | null;
-  setApp: (app: AetherApp | null) => void;
+  loadingState: LoadingState;
+  error: Error | null;
+  setApp: (state: { instance: AetherApp | null; loadingState?: LoadingState; error?: Error | null }) => void;
 }
 
 export const AetherContext = createContext<AetherContextType>({
   app: null,
+  loadingState: 'idle',
+  error: null,
   setApp: () => {}
 });
 
@@ -15,15 +21,36 @@ interface AetherProviderProps {
   children: ReactNode;
 }
 
-export const AetherProvider: React.FC<AetherProviderProps> = ({ children }) => {
-  const [app, setAppState] = useState<AetherApp | null>(null);
-  
-  const setApp = useCallback((newApp: AetherApp | null) => {
-    setAppState(newApp);
+export const AetherProvider = ({ children }: AetherProviderProps): React.ReactElement => {
+  const [state, setState] = useState<{
+    app: AetherApp | null;
+    loadingState: LoadingState;
+    error: Error | null;
+  }>({
+    app: null,
+    loadingState: 'idle',
+    error: null
+  });
+
+  const setApp = useCallback((newState: {
+    instance: AetherApp | null;
+    loadingState?: LoadingState;
+    error?: Error | null;
+  }) => {
+    setState(prevState => ({
+      app: newState.instance,
+      loadingState: newState.loadingState ?? prevState.loadingState,
+      error: newState.error ?? prevState.error
+    }));
   }, []);
-  
+
   return (
-    <AetherContext.Provider value={{ app, setApp }}>
+    <AetherContext.Provider value={{
+      app: state.app,
+      loadingState: state.loadingState,
+      error: state.error,
+      setApp
+    }}>
       {children}
     </AetherContext.Provider>
   );

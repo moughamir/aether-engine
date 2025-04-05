@@ -17,34 +17,43 @@ export const AetherCanvas: React.FC<AetherCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { setApp } = useAether();
-  
+
   useEffect(() => {
     if (!canvasRef.current) return;
-    
-    // Create Aether app with the canvas
-    const app = new AetherApp({
-      ...options,
-      canvas: canvasRef.current
-    });
-    
-    // Start the app
-    app.start();
-    
-    // Set the app in context
-    setApp(app);
-    
-    // Call onReady callback
-    if (onReady) {
-      onReady(app);
+
+    let appInstance: AetherApp | null = null;
+
+    try {
+      appInstance = new AetherApp({
+        ...options,
+        canvas: canvasRef.current
+      });
+
+      setApp({ instance: appInstance, loadingState: 'initializing' });
+
+      appInstance.start();
+      setApp({ instance: appInstance, loadingState: 'loading-assets' });
+
+      if (onReady) onReady(appInstance);
+      setApp({ instance: appInstance, loadingState: 'ready' });
+
+    } catch (error) {
+      console.error('AetherEngine initialization failed:', error);
+      setApp({
+        instance: null,
+        error: error instanceof Error ? error : new Error('Engine initialization failed'),
+        loadingState: 'error'
+      });
     }
-    
-    // Cleanup on unmount
+
     return () => {
-      app.dispose();
-      setApp(null);
+      if (appInstance) {
+        appInstance.dispose();
+      }
+      setApp({ instance: null, loadingState: 'idle' });
     };
   }, [options, onReady, setApp]);
-  
+
   return (
     <canvas
       ref={canvasRef}

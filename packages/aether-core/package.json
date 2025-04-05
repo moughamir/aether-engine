@@ -11,6 +11,7 @@
     "@aether/shared": "workspace:*",
     "axios": "^1.8.4",
     "cannon-es": "^0.20.0",
+    "cannon-es-debugger": "^1.0.0",
     "eventemitter3": "^5.0.1",
     "socket.io-client": "^4.8.1",
     "three": "^0.150.1"
