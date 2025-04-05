@@ -1,6 +1,12 @@
 {
   "name": "@aether/core",
   "version": "0.1.0",
+  "publishConfig": {
+    "registry": "http://localhost:4873/"
+  },
+  "description": "Aether core",
+  "author": "Aether",
+  "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
