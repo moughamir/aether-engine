@@ -1,7 +1,6 @@
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { SupabaseClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
-import { MessageType, NetworkMessage, Entity } from '@aether/shared';
 import { RoomManager } from './RoomManager';
 import { EntityManager } from './EntityManager';
 
@@ -12,6 +11,7 @@ export interface GameServerOptions {
 // Add proper redis usage
 export class GameServer {
   private roomManager: RoomManager;
+  private entityManager: EntityManager;
   private tickRate: number;
   private isRunning = false;
 
@@ -40,21 +40,35 @@ export class GameServer {
     this.isRunning = true;
     const tickInterval = 1000 / this.tickRate;
 
-    while (this.isRunning) {
-      const startTime = Date.now();
-      const roomStates = await this.roomManager.getAllRoomStates();
-      await this.entityManager.processPhysics(roomStates);
-      this.roomManager.broadcastStates(roomStates);
-      const processingTime = Date.now() - startTime;
-      await new Promise(resolve =>
-        setTimeout(resolve, Math.max(tickInterval - processingTime, 0))
-      );
+    try {
+      while (this.isRunning) {
+        const startTime = Date.now();
+        const roomStates = await this.roomManager.getAllRoomStates();
+
+        try {
+          await this.entityManager.processPhysics(roomStates);
+          this.roomManager.broadcastStates(roomStates);
+        } catch (physicsError) {
+          console.error('Physics processing error:', physicsError);
+        }
+
+        const processingTime = Date.now() - startTime;
+        await new Promise(resolve =>
+          setTimeout(resolve, Math.max(tickInterval - processingTime, 0))
+        );
+      }
+    } catch (error) {
+      console.error('Game loop fatal error:', error);
+      this.shutdown();
     }
   }
 
   shutdown() {
     this.isRunning = false;
-    clearInterval(this.gameLoopInterval);
-    this.redis.disconnect();
+    try {
+      this.redis.quit();
+    } catch (redisError) {
+      console.error('Redis shutdown error:', redisError);
+    }
   }
 }
