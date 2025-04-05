@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import { createClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
 import dotenv from 'dotenv';
-import { MessageType } from '@aether/shared';
+
 import { GameServer } from './GameServer';
 
 // Load environment variables
