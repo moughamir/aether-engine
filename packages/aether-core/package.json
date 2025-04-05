@@ -1,0 +1,22 @@
+{
+  "name": "@aether/core",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@aether/shared": "workspace:*",
+    "axios": "^1.8.4",
+    "cannon-es": "^0.20.0",
+    "eventemitter3": "^5.0.1",
+    "socket.io-client": "^4.8.1",
+    "three": "^0.150.1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.150.2",
+    "typescript": "^5.0.0"
+  }
+}
