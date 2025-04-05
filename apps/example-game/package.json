@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aether/core": "workspace:*",
+
     "@aether/shared": "workspace:*",
     "@types/three": "^0.150.2",
     "react": "^18.2.0",
