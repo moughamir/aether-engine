@@ -1,6 +1,6 @@
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import Redis from 'ioredis';
-import { MessageType } from '@aether/shared';
+
 
 // Add proper io usage
 export class RoomManager {

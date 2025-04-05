@@ -15,9 +15,10 @@ export class GameServer {
   private tickRate: number;
   private isRunning = false;
 
+
   constructor(
-    private io: Server,
-    private supabase: SupabaseClient,
+    io: Server,
+    supabase: SupabaseClient,
     private redis: Redis,
     options?: GameServerOptions
   ) {
@@ -26,15 +27,9 @@ export class GameServer {
     this.entityManager = new EntityManager(supabase, redis);
   }
 
-  private gameLoopInterval?: NodeJS.Timeout;
 
-  async start() {
-    this.gameLoopInterval = setInterval(async () => {
-      const roomStates = await this.roomManager.getAllRoomStates();
-      await this.entityManager.processPhysics(roomStates);
-      this.roomManager.broadcastStates(roomStates);
-    }, 1000 / this.tickRate);
-  }
+
+
 
   async startGameLoop() {
     this.isRunning = true;
@@ -66,6 +61,7 @@ export class GameServer {
   shutdown() {
     this.isRunning = false;
     try {
+
       this.redis.quit();
     } catch (redisError) {
       console.error('Redis shutdown error:', redisError);

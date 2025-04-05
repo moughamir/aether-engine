@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import http from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
@@ -12,7 +12,7 @@ import { GameServer } from './GameServer';
 dotenv.config();
 
 // Create Express app
-const app = express();
+const app: Express = express();
 app.use(cors());
 app.use(express.json());
 
@@ -40,7 +40,7 @@ const redis = new Redis(redisUrl);
 const gameServer = new GameServer(io, supabase, redis);
 
 // API routes
-app.get('/health', (req, res) => {
+app.get('/health', (_req: express.Request, res: express.Response) => {
   res.json({ status: 'ok' });
 });
 

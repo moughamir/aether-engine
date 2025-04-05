@@ -1,3 +1,4 @@
+import type {Body} from 'cannon'
 export interface Vector3 {
   x: number;
   y: number;
@@ -32,6 +33,7 @@ export interface Entity<T extends ComponentMap = ComponentMap> {
   type: string;
   components: T;
   tags?: string[];
+  body?: Body;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,12 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
-import * as CANNON from 'cannon-es';
+import * as CANNON from 'cannon'
 
-declare module 'cannon-es' {
-  interface Body {
-    id: string;
-  }
-}
+
 
 import { Entity } from '@aether/shared';
 
@@ -25,13 +21,13 @@ export class EntityManager {
   async processPhysics(roomStates: any[]) {
     await Promise.all(roomStates.map(async (room) => {
       const physicsState = await this.redis.get(`physics:${room.id}`);
-      const bodies = this.loadPhysicsBodies(physicsState);
+      const bodies = this.loadPhysicsBodies(physicsState || '');
 
       // Simulation step
       this.physicsWorld.step(1 / 60);
 
       // Update Redis state
-      const newState = bodies.map(body => ({
+      const newState = bodies.map((body: CANNON.Body) => ({
         id: body.id,
         position: body.position,
         quaternion: body.quaternion
