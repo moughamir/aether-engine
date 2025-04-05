@@ -1,12 +1,12 @@
 import { useContext } from 'react';
-import { AetherContext } from '../context/AetherContext';
+import { AetherContext, AetherContextType } from '../context/AetherContext';
 
-export const useAether = () => {
+export const useAether = (): AetherContextType => {
   const context = useContext(AetherContext);
-  
+
   if (context === undefined) {
     throw new Error('useAether must be used within an AetherProvider');
   }
-  
+
   return context;
 };

@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { AetherApp } from '../AetherApp';
-import { CameraManager } from './CameraManager';
+import * as THREE from "three";
+import { AetherApp } from "../AetherApp";
+import { CameraManager } from "./CameraManager";
 
 interface FogOptions {
   color?: string | number;
@@ -10,7 +10,7 @@ interface FogOptions {
 }
 
 interface CameraOptions {
-  type?: 'perspective' | 'orthographic';
+  type?: "perspective" | "orthographic";
   fov?: number;
   near?: number;
   far?: number;
@@ -19,7 +19,7 @@ interface CameraOptions {
 }
 
 export class SceneManager {
-  private app: AetherApp;
+  app: AetherApp;
   public scene: THREE.Scene;
   public cameraManager: CameraManager;
 
@@ -57,7 +57,10 @@ export class SceneManager {
    * Set the fog in the scene
    */
   public setFog(options: FogOptions): void {
-    const color = options.color !== undefined ? new THREE.Color(options.color) : new THREE.Color(0xcccccc);
+    const color =
+      options.color !== undefined
+        ? new THREE.Color(options.color)
+        : new THREE.Color(0xcccccc);
 
     if (options.density !== undefined) {
       // Create exponential fog if density is provided
@@ -75,10 +78,13 @@ export class SceneManager {
     const aspect = window.innerWidth / window.innerHeight;
     let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 
-    if (options.type === 'orthographic') {
+    if (options.type === "orthographic") {
       // Create orthographic camera
       camera = new THREE.OrthographicCamera(
-        -1, 1, 1, -1,
+        -1,
+        1,
+        1,
+        -1,
         options.near || 0.1,
         options.far || 1000
       );
@@ -103,11 +109,13 @@ export class SceneManager {
 
     // Set camera lookAt if provided
     if (options.lookAt) {
-      camera.lookAt(new THREE.Vector3(
-        options.lookAt.x || 0,
-        options.lookAt.y || 0,
-        options.lookAt.z || 0
-      ));
+      camera.lookAt(
+        new THREE.Vector3(
+          options.lookAt.x || 0,
+          options.lookAt.y || 0,
+          options.lookAt.z || 0
+        )
+      );
     }
 
     // Set as active camera
@@ -141,7 +149,7 @@ export class SceneManager {
 
         if (object.material) {
           if (Array.isArray(object.material)) {
-            object.material.forEach(material => material.dispose());
+            object.material.forEach((material) => material.dispose());
           } else {
             object.material.dispose();
           }

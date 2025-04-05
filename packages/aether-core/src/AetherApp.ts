@@ -5,73 +5,9 @@ import { NetworkManager } from './network/NetworkManager';
 import { EntityManager } from './entity/EntityManager';
 import { AssetLoader } from './assets/AssetLoader';
 import EventEmitter from 'eventemitter3';
+import { AetherAppOptions } from '.';
 
-export interface AetherAppOptions {
-  // Core rendering options
-  canvas?: HTMLCanvasElement;
-  width?: number;
-  height?: number;
-  pixelRatio?: number;
 
-  // Renderer configuration
-  renderer?: {
-    antialias?: boolean;
-    alpha?: boolean;
-    preserveDrawingBuffer?: boolean;
-    powerPreference?: 'high-performance' | 'low-power' | 'default';
-    shadowMap?: {
-      enabled?: boolean;
-      type?: THREE.ShadowMapType;
-    };
-  };
-
-  // Scene configuration
-  scene?: {
-    background?: THREE.Color | THREE.Texture | string | number;
-    fog?: {
-      enabled?: boolean;
-      color?: string | number;
-      density?: number;
-      near?: number;
-      far?: number;
-    };
-  };
-
-  // Camera settings
-  camera?: {
-    type?: 'perspective' | 'orthographic';
-    fov?: number;
-    near?: number;
-    far?: number;
-    position?: { x: number; y: number; z: number };
-    lookAt?: { x: number; y: number; z: number };
-  };
-
-  // System enablement flags
-  physics?: boolean | {
-    gravity?: { x: number; y: number; z: number };
-    debug?: boolean;
-  };
-  networking?: boolean | {
-    serverUrl?: string;
-    autoConnect?: boolean;
-    reconnect?: boolean;
-  };
-
-  // Asset loading configuration
-  assets?: {
-    baseUrl?: string;
-    preload?: string[];
-    loadingStrategy?: 'eager' | 'lazy' | 'progressive';
-  };
-
-  // Performance options
-  performance?: {
-    targetFPS?: number;
-    autoThrottle?: boolean;
-    throttleWhenHidden?: boolean;
-  };
-}
 
 export class AetherApp extends EventEmitter {
   private renderer: THREE.WebGLRenderer;
@@ -139,7 +75,7 @@ export class AetherApp extends EventEmitter {
       this.sceneManager.setupCamera(options.camera);
     }
 
-    this.entityManager = new EntityManager(this);
+    this.entityManager = new EntityManager();
 
     // Configure asset loader
     this.assetLoader = new AssetLoader();

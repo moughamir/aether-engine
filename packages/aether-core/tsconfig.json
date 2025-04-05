@@ -3,10 +3,12 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
+    "declarationDir": "./dist/types",
     "noEmit": false,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "types": ["node"]
   },
   "include": ["src"]
 }

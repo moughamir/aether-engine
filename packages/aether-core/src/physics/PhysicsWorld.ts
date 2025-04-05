@@ -1,7 +1,7 @@
 import {World, Material, Body,
    BodyOptions, SAPBroadphase, GSSolver} from 'cannon-es';
 import * as THREE from 'three';
-import CannonDebugger, { DebugOptions } from 'cannon-es-debugger';
+import CannonDebugger from 'cannon-es-debugger';
 
 import { Vector3 } from '@aether/shared';
 

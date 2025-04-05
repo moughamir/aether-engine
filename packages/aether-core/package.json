@@ -1,8 +1,15 @@
 {
   "name": "@aether/core",
   "version": "0.1.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./src/*": "./src/*"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"
@@ -14,10 +21,13 @@
     "cannon-es-debugger": "^1.0.0",
     "eventemitter3": "^5.0.1",
     "socket.io-client": "^4.8.1",
-    "three": "^0.150.1"
+    "three": "^0.150.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/three": "^0.150.2",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@types/node": "^20.11.24",
+    "@types/uuid": "^9.0.7"
   }
 }

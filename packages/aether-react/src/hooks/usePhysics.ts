@@ -21,28 +21,28 @@ export interface UsePhysicsOptions {
 export const usePhysics = (mesh: THREE.Object3D | null, options: UsePhysicsOptions = {}) => {
   const { app } = useAether();
   const [body, setBody] = useState<CANNON.Body | null>(null);
-  
+
   useEffect(() => {
     if (!app?.physicsWorld || !mesh) return;
-    
+
     // Create physics body
     const bodyOptions: CANNON.BodyOptions = {
       mass: options.type === 'static' ? 0 : (options.mass || 1),
-      type: options.type === 'kinematic' 
-        ? CANNON.BODY_TYPES.KINEMATIC 
+      type: options.type === 'kinematic'
+        ? CANNON.BODY_TYPES.KINEMATIC
         : (options.type === 'static' ? CANNON.BODY_TYPES.STATIC : CANNON.BODY_TYPES.DYNAMIC),
       material: options.material
     };
-    
+
     const body = new CANNON.Body(bodyOptions);
-    
+
     // Add shape based on options
     if (options.shape === 'box' || !options.shape) {
       const dimensions = options.dimensions || {};
       const halfWidth = (dimensions.width || 1) / 2;
       const halfHeight = (dimensions.height || 1) / 2;
       const halfDepth = (dimensions.depth || 1) / 2;
-      
+
       body.addShape(new CANNON.Box(new CANNON.Vec3(halfWidth, halfHeight, halfDepth)));
     } else if (options.shape === 'sphere') {
       const radius = options.dimensions?.radius || 0.5;
@@ -50,7 +50,7 @@ export const usePhysics = (mesh: THREE.Object3D | null, options: UsePhysicsOptio
     } else if (options.shape === 'plane') {
       body.addShape(new CANNON.Plane());
     }
-    
+
     // Set initial position and rotation
     if (options.position) {
       body.position.set(
@@ -65,7 +65,7 @@ export const usePhysics = (mesh: THREE.Object3D | null, options: UsePhysicsOptio
         mesh.position.z
       );
     }
-    
+
     if (options.rotation) {
       body.quaternion.set(
         options.rotation.x,
@@ -81,11 +81,11 @@ export const usePhysics = (mesh: THREE.Object3D | null, options: UsePhysicsOptio
         mesh.quaternion.w
       );
     }
-    
+
     // Add body to physics world
     app.physicsWorld.world.addBody(body);
     setBody(body);
-    
+
     // Update mesh position/rotation based on physics body
     const updateMesh = () => {
       if (mesh && body) {
@@ -98,17 +98,17 @@ export const usePhysics = (mesh: THREE.Object3D | null, options: UsePhysicsOptio
         );
       }
     };
-    
+
     // Subscribe to physics updates
     app.physicsWorld.world.addEventListener('postStep', updateMesh);
-    
+
     return () => {
-      app.physicsWorld.world.removeEventListener('postStep', updateMesh);
+      app?.physicsWorld?.world.removeEventListener('postStep', updateMesh);
       if (body) {
-        app.physicsWorld.world.removeBody(body);
+        app?.physicsWorld?.world.removeBody(body);
       }
     };
   }, [app, mesh, options]);
-  
+
   return body;
 };

@@ -3,7 +3,7 @@ import { AetherApp } from '@aether/core';
 
 export type LoadingState = 'idle' | 'initializing' | 'loading-assets' | 'ready' | 'error';
 
-interface AetherContextType {
+export interface AetherContextType {
   app: AetherApp | null;
   loadingState: LoadingState;
   error: Error | null;
