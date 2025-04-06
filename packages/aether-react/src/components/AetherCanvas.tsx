@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { AetherApp, AetherAppOptions } from '@aether/core';
+import AetherApp, {type AetherAppOptions } from "@aether/core";
 import { useAether } from '../hooks/useAether';
 
 export interface AetherCanvasProps {

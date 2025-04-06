@@ -1,19 +1,20 @@
+
+
 // Main application
-export { AetherApp } from './AetherApp';
+export * as AetherApp from './AetherApp';
 
 // Rendering
-export { SceneManager } from './rendering/SceneManager';
-export { CameraManager } from './rendering/CameraManager';
+export { SceneManager } from './managers/rendering/SceneManager';
+export { CameraManager } from './managers/rendering/CameraManager';
 
 // Physics
-export { PhysicsWorld } from './physics/PhysicsWorld';
+export { PhysicsWorld } from './systems/physics/PhysicsWorld';
 
 // Entity system
-export { EntityManager } from './entity/EntityManager';
+export { EntityManager } from './managers/entity/EntityManager';
 
 // Asset management
-export { AssetLoader } from './assets/AssetLoader';
+export { AssetLoader } from './managers/assets/AssetLoader';
 
 // Networking
-export { NetworkManager } from './network/NetworkManager';
-
+export { NetworkManager } from './systems/network/NetworkManager';

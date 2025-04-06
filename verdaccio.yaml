@@ -1,0 +1,24 @@
+storage: ../storage
+plugins: ../plugins
+web:
+  enable: true
+  port: 4872
+  title: Aether Local Registry
+  primary_color: "#4b158a"
+  secondary_color: "#800080"
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+packages:
+  '@aether/*':
+    access: $all
+    publish: $authenticated
+    proxy: npmjs
+  '**':
+    access: $all
+    publish: $authenticated
+    proxy: npmjs
+listen: 0.0.0.0:4873
+
+publish:
+  allow_offline: true
