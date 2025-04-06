@@ -1,31 +1,26 @@
-import express, { Express } from "express";
-import http from "http";
-import cors from "cors";
-import { Server } from "socket.io";
-import { createClient } from "@supabase/supabase-js";
-import Redis from "ioredis";
-import dotenv from "dotenv";
-import { GameServer } from "./GameServer";
-dotenv.config();
-const app: Express = express();
-app.use(cors());
-app.use(express.json());
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
+// index.ts (Main Entry Point)
+import { startServer } from "./createServer"; // Assuming server.ts is in the same directory
+
+async function main() {
+  try {
+    const { app, server, io, supabase, redis, gameServer } =
+      await startServer();
+
+    // You can optionally do more with the server, app, etc. here if needed
+    // For example, set up more routes on 'app' after the base server is created.
+
+    console.log("Aether server initialized and started.");
+
+    // Optionally export if you need to access these in tests or other modules
+    return { app, server, io, supabase, redis, gameServer };
+  } catch (error) {
+    console.error("Server startup failed:", error);
+    process.exit(1); // Exit process on startup failure
+  }
+}
+
+// Run the main function to start the server
+main().catch((err) => {
+  console.error("Unhandled error during startup:", err);
+  process.exit(1);
 });
-const supabase = createClient(
-  process.env.SUPABASE_URL || "",
-  process.env.SUPABASE_KEY || ""
-);
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
-const gameServer = new GameServer(io, supabase, redis, {
-  tickRate: 30,
-});
-app.get("/health", (_req: express.Request, res: express.Response) =>
-  res.json({ status: "ok" })
-);
-server.listen(process.env.PORT || 3301, () => {
-  console.log(`Aether server running on port ${process.env.PORT || 3301}`);
-});
-export { app, server, io, supabase, redis, gameServer };

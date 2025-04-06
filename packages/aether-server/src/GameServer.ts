@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Redis from "ioredis";
-import { RoomManager } from "./RoomManager";
-import { EntityManager } from "./EntityManager";
+import { RoomManager } from "./roomManager";
+import { EntityManager } from "./entityManager";
 
 export interface GameServerOptions {
   tickRate?: number;
