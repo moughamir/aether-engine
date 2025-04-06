@@ -1,15 +1,16 @@
-import { Quaternion } from './quaternion';
-import { Vector3 } from './vector3';
 
-interface Transform {
+import type { Quaternion, Vector3 } from "../math"
+
+
+export interface Transform {
   position: Vector3;
   rotation: Quaternion;
   scale: Vector3;
 }
 
-type PhysicsShape = 'box' | 'sphere' | 'cylinder';
+export type PhysicsShape = 'box' | 'sphere' | 'cylinder';
 
-interface Physics {
+export interface Physics {
   mass: number;
   shape: PhysicsShape;
   dimensions: Vector3;
@@ -18,7 +19,6 @@ interface Physics {
 export interface ComponentMap {
   transform?: Transform;
   physics?: Physics;
-  // Add common component fields
   roomId?: string;
   ownerId?: string;
 }

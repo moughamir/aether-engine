@@ -1,12 +1,3 @@
-/**
- * Shared lifecycle utilities for Aether Engine components
- */
-
-/**
- * Throttles a function to limit how often it can be called
- * @param fn Function to throttle
- * @param limit Time limit in milliseconds
- */
 export function throttle(fn: (...args: any[]) => void, limit: number) {
   let lastCall = 0;
   return (...args: any[]) => {

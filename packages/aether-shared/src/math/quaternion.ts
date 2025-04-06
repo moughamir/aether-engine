@@ -1,112 +1,5 @@
-/**
- * Shared math utilities for Aether Engine components
- */
-import { Vector3 } from '../types/vector3';
-import { Quaternion } from '../types/quaternion';
+import type { Quaternion , Vector3} from "./contracts"
 
-/**
- * Vector3 utility functions
- */
-export const Vec3 = {
-  /**
-   * Creates a new Vector3
-   */
-  create(x = 0, y = 0, z = 0): Vector3 {
-    return { x, y, z };
-  },
-
-  /**
-   * Adds two vectors
-   */
-  add(a: Vector3, b: Vector3): Vector3 {
-    return {
-      x: a.x + b.x,
-      y: a.y + b.y,
-      z: a.z + b.z
-    };
-  },
-
-  /**
-   * Subtracts vector b from vector a
-   */
-  subtract(a: Vector3, b: Vector3): Vector3 {
-    return {
-      x: a.x - b.x,
-      y: a.y - b.y,
-      z: a.z - b.z
-    };
-  },
-
-  /**
-   * Multiplies a vector by a scalar
-   */
-  scale(v: Vector3, scalar: number): Vector3 {
-    return {
-      x: v.x * scalar,
-      y: v.y * scalar,
-      z: v.z * scalar
-    };
-  },
-
-  /**
-   * Calculates the dot product of two vectors
-   */
-  dot(a: Vector3, b: Vector3): number {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-  },
-
-  /**
-   * Calculates the cross product of two vectors
-   */
-  cross(a: Vector3, b: Vector3): Vector3 {
-    return {
-      x: a.y * b.z - a.z * b.y,
-      y: a.z * b.x - a.x * b.z,
-      z: a.x * b.y - a.y * b.x
-    };
-  },
-
-  /**
-   * Calculates the length of a vector
-   */
-  length(v: Vector3): number {
-    return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-  },
-
-  /**
-   * Normalizes a vector
-   */
-  normalize(v: Vector3): Vector3 {
-    const len = Vec3.length(v);
-    if (len === 0) return { x: 0, y: 0, z: 0 };
-    return {
-      x: v.x / len,
-      y: v.y / len,
-      z: v.z / len
-    };
-  },
-
-  /**
-   * Calculates the distance between two vectors
-   */
-  distance(a: Vector3, b: Vector3): number {
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    const dz = b.z - a.z;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-  },
-
-  /**
-   * Linearly interpolates between two vectors
-   */
-  lerp(a: Vector3, b: Vector3, t: number): Vector3 {
-    return {
-      x: a.x + (b.x - a.x) * t,
-      y: a.y + (b.y - a.y) * t,
-      z: a.z + (b.z - a.z) * t
-    };
-  }
-};
 
 /**
  * Quaternion utility functions
@@ -134,7 +27,7 @@ export const Quat = {
       x: sx * cy * cz - cx * sy * sz,
       y: cx * sy * cz + sx * cy * sz,
       z: cx * cy * sz - sx * sy * cz,
-      w: cx * cy * cz + sx * sy * sz
+      w: cx * cy * cz + sx * sy * sz,
     };
   },
 
@@ -146,7 +39,7 @@ export const Quat = {
       x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
       y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
       z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
-      w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
+      w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
     };
   },
 
@@ -160,7 +53,7 @@ export const Quat = {
       x: q.x / len,
       y: q.y / len,
       z: q.z / len,
-      w: q.w / len
+      w: q.w / len,
     };
   },
 
@@ -180,7 +73,7 @@ export const Quat = {
     const sinp = 2 * (w * y - z * x);
     let pitch;
     if (Math.abs(sinp) >= 1) {
-      pitch = Math.sign(sinp) * Math.PI / 2; // Use 90 degrees if out of range
+      pitch = (Math.sign(sinp) * Math.PI) / 2; // Use 90 degrees if out of range
     } else {
       pitch = Math.asin(sinp);
     }
@@ -212,10 +105,10 @@ export const Quat = {
     // We could rotate around any axis normal to a or b
     if (Math.abs(sinHalfTheta) < 0.001) {
       return {
-        x: (a.x * 0.5 + b.x * 0.5),
-        y: (a.y * 0.5 + b.y * 0.5),
-        z: (a.z * 0.5 + b.z * 0.5),
-        w: (a.w * 0.5 + b.w * 0.5)
+        x: a.x * 0.5 + b.x * 0.5,
+        y: a.y * 0.5 + b.y * 0.5,
+        z: a.z * 0.5 + b.z * 0.5,
+        w: a.w * 0.5 + b.w * 0.5,
       };
     }
 
@@ -223,10 +116,10 @@ export const Quat = {
     const ratioB = Math.sin(t * halfTheta) / sinHalfTheta;
 
     return {
-      x: (a.x * ratioA + b.x * ratioB),
-      y: (a.y * ratioA + b.y * ratioB),
-      z: (a.z * ratioA + b.z * ratioB),
-      w: (a.w * ratioA + b.w * ratioB)
+      x: a.x * ratioA + b.x * ratioB,
+      y: a.y * ratioA + b.y * ratioB,
+      z: a.z * ratioA + b.z * ratioB,
+      w: a.w * ratioA + b.w * ratioB,
     };
-  }
+  },
 };
