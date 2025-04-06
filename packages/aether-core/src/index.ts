@@ -1,20 +1,16 @@
+import * as AetherApp from "./aetherApp";
 
+export * from "./types";
+export * from "./aiSystem";
+export * from "./assetLoader";
+export * from "./cameraManager";
+export * from "./entityManager";
+export * from "./eventRegistry";
+export * from "./initResourcePool";
+export * from "./networkManager";
+export * from "./physicsWorld";
+export * from "./resourcePool";
+export * from "./sceneManager";
+export * from "./utils";
 
-// Main application
-export * as AetherApp from './AetherApp';
-
-// Rendering
-export { SceneManager } from './managers/rendering/SceneManager';
-export { CameraManager } from './managers/rendering/CameraManager';
-
-// Physics
-export { PhysicsWorld } from './systems/physics/PhysicsWorld';
-
-// Entity system
-export { EntityManager } from './managers/entity/EntityManager';
-
-// Asset management
-export { AssetLoader } from './managers/assets/AssetLoader';
-
-// Networking
-export { NetworkManager } from './systems/network/NetworkManager';
+export default AetherApp;

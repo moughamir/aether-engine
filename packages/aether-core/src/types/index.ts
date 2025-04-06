@@ -43,12 +43,32 @@ export interface Disposable {
 export interface Initializable {
   initialize(options?: Record<string, any>): Promise<void>;
 }
-
+export interface NetworkOptions {
+  url: string;
+  autoConnect?: boolean;
+  auth?: Record<string, any>;
+  reconnect?: {
+    maxAttempts?: number;
+    baseDelay?: number;
+    exponentialBackoff?: boolean;
+  };
+  messageBuffering?: {
+    enabled?: boolean;
+    maxSize?: number;
+  };
+}
 // Simplified Physics options
 export interface PhysicsOptions {
   gravity?: THREE.Vector3;
   debug?: boolean;
   solver?: "GS" | "NS";
+}
+export interface PhysicsWorldOptions {
+  gravity?: THREE.Vector3;
+  iterations?: number;
+  broadphase?: "naive" | "sap";
+  fixedTimeStep?: number;
+  maxSubSteps?: number;
 }
 
 export interface AssetLoadingOptions {
@@ -88,7 +108,6 @@ export interface AetherAppOptions {
   [key: string]: any;
 }
 
-
 export interface NetworkingOptions {
   serverUrl?: string;
   autoConnect?: boolean;
@@ -108,3 +127,73 @@ export type LoadingStrategy = "eager" | "lazy" | "progressive";
 
 export type CameraViewType = "perspective" | "orthographic";
 export type AssetType = "texture" | "model" | "audio";
+
+export interface AssetLoaderOptions {
+  baseUrl?: string;
+  preload?: string[];
+  loadingStrategy?: LoadingStrategy;
+  cacheAssets?: boolean;
+  maxRetries?: number;
+  dracoDecoderPath?: string;
+  onProgress?: (
+    progress: number,
+    url: string,
+    loaded: number,
+    total: number
+  ) => void;
+}
+
+export interface AssetCache {
+  textures: Map<string, THREE.Texture>;
+  models: Map<string, THREE.Group>;
+  audio: Map<string, AudioBuffer>;
+}
+
+export interface LoaderWithLoad<T> {
+  load(
+    url: string,
+    onLoad: (result: T) => void,
+    onProgress?: (event: ProgressEvent) => void,
+    onError?: (error: ErrorEvent) => void
+  ): void;
+}
+
+export interface FogOptions {
+  color?: THREE.ColorRepresentation;
+  density?: number;
+  near?: number;
+  far?: number;
+}
+
+export type NodeStatus = "SUCCESS" | "FAILURE" | "RUNNING";
+
+export interface BehaviorNode<T extends object> {
+  tick(agent: BaseAgent<T>): NodeStatus;
+  dispose(): void;
+}
+
+export interface BaseAgent<T extends object> {
+  state: T;
+  update(): NodeStatus;
+  dispose(): void;
+}
+export interface AIConfig<T extends object> {
+  rootNode: BehaviorNode<T>;
+  initialState: T;
+}
+
+export interface AIAgent<T extends object> extends BaseAgent<T> {
+  restart(): void;
+}
+
+export interface AIState {
+  currentBehavior?: AIBehavior;
+  physicsBody?: any; // Will integrate with Cannon-es body reference
+  targetPosition?: THREE.Vector3;
+  sensors: Record<string, any>;
+}
+
+export abstract class AIBehavior {
+  abstract execute(state: AIState): void;
+  dispose() {}
+}

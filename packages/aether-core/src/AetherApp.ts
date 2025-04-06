@@ -1,15 +1,19 @@
 import * as THREE from "three";
-import { SceneManager } from "./managers/rendering/SceneManager";
-import { PhysicsWorld } from "./systems/physics/PhysicsWorld";
-import { EntityManager } from "./managers/entity/EntityManager";
-import { AssetLoader } from "./managers/assets/AssetLoader";
-import EventEmitter from "eventemitter3";
-import { AetherAppOptions } from "./contracts";
-import { Lifecycle, debounce, ErrorType, createError } from "@aether/shared";
-import { NetworkManager } from "./systems/network/NetworkManager";
-import { initResourcePool } from "./utils/initResourcePool";
 
-export class AetherApp extends EventEmitter implements Lifecycle {
+import { PhysicsWorld } from "./physicsWorld";
+import { EntityManager } from "./entityManager";
+
+import EventEmitter from "eventemitter3";
+
+import { Lifecycle, debounce, ErrorType, createError } from "@aether/shared";
+import { NetworkManager } from "./networkManager";
+import { initResourcePool } from "./initResourcePool";
+import { SceneManager } from "./sceneManager";
+import { AssetLoader } from "./assetLoader";
+import type { AetherAppOptions } from "./types";
+import { PerformanceStats, PerformanceOptions } from "./types/performanceTypes";
+
+export default class AetherApp extends EventEmitter implements Lifecycle {
   private renderer!: THREE.WebGLRenderer;
   private lastTime: number = 0;
   private isRunning: boolean = false;
@@ -24,11 +28,7 @@ export class AetherApp extends EventEmitter implements Lifecycle {
   public networkManager?: NetworkManager;
   public entityManager!: EntityManager;
   public assetLoader!: AssetLoader;
-  public stats: {
-    fps: number;
-    frameTime: number;
-    physicsTime: number;
-  } = { fps: 0, frameTime: 0, physicsTime: 0 };
+  public stats: PerformanceStats = { fps: 0, frameTime: 0, physicsTime: 0 };
 
   constructor(options: AetherAppOptions = {}) {
     super();
@@ -47,15 +47,13 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     } catch (error) {
       throw createError(
         ErrorType.INITIALIZATION,
-        `Failed to initialize AetherApp: ${error instanceof Error ? error.message : String(error)}`,__dirname,
+        `Failed to initialize AetherApp: ${error instanceof Error ? error.message : String(error)}`,
+        __dirname,
         { options }
       );
     }
   }
 
-  /**
-   * Initializes the WebGL renderer with the provided options
-   */
   private initializeRenderer(): void {
     // Create renderer
     const canvas = this.options.canvas || document.createElement("canvas");
@@ -63,7 +61,8 @@ export class AetherApp extends EventEmitter implements Lifecycle {
       canvas,
       antialias: this.options.renderer?.antialias ?? true,
       alpha: this.options.renderer?.alpha ?? false,
-      preserveDrawingBuffer: this.options.renderer?.preserveDrawingBuffer ?? false,
+      preserveDrawingBuffer:
+        this.options.renderer?.preserveDrawingBuffer ?? false,
       powerPreference: this.options.renderer?.powerPreference ?? "default",
     });
 
@@ -85,9 +84,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Initializes and configures the core managers (scene, entity, asset)
-   */
   private initializeManagers(): void {
     // Create scene manager
     this.sceneManager = new SceneManager(this);
@@ -101,9 +97,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     this.configureAssetLoader();
   }
 
-  /**
-   * Configures the scene with the provided options
-   */
   private configureScene(): void {
     if (!this.options.scene) return;
 
@@ -135,9 +128,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Configures the asset loader with the provided options
-   */
   private configureAssetLoader(): void {
     if (!this.options.assets) return;
 
@@ -150,17 +140,11 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Sets up optional systems like physics and networking
-   */
   private setupOptionalSystems(): void {
     this.setupPhysics();
     this.setupNetworking();
   }
 
-  /**
-   * Sets up the physics system if enabled in options
-   */
   private setupPhysics(): void {
     if (!this.options.physics) return;
 
@@ -178,9 +162,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Sets up the networking system if enabled in options
-   */
   private setupNetworking(): void {
     if (!this.options.networking) return;
 
@@ -198,10 +179,7 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Configures performance-related options
-   */
-  private configurePerformance(): void {
+  private configurePerformance(_options?: PerformanceOptions): void {
     if (!this.options.performance) return;
 
     if (this.options.performance.targetFPS) {
@@ -210,9 +188,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Sets up event listeners for window events
-   */
   private setupEventListeners(): void {
     // Set up visibility change listener if throttling is enabled
     if (this.options.performance?.throttleWhenHidden) {
@@ -296,11 +271,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Determines if the current frame should be throttled based on target FPS
-   * @param frameStartTime Current frame start timestamp
-   * @returns True if the frame should be throttled
-   */
   private shouldThrottleFrame(frameStartTime: number): boolean {
     if (this.targetFPS && this.fpsInterval) {
       const elapsed = frameStartTime - this.lastTime;
@@ -309,10 +279,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     return false;
   }
 
-  /**
-   * Updates the physics simulation
-   * @param deltaTime Time since last update in seconds
-   */
   private updatePhysics(deltaTime: number): void {
     if (!this.physicsWorld) return;
 
@@ -327,25 +293,14 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     this.stats.physicsTime = performance.now() - physicsStartTime;
   }
 
-  /**
-   * Updates all entities in the entity manager
-   * @param deltaTime Time since last update in seconds
-   */
   private updateEntities(deltaTime: number): void {
     this.entityManager.update(deltaTime);
   }
 
-  /**
-   * Renders the current scene
-   */
   private renderScene(): void {
     this.sceneManager.render(this.renderer);
   }
 
-  /**
-   * Updates performance statistics
-   * @param frameStartTime Start time of the current frame
-   */
   private updatePerformanceStats(frameStartTime: number): void {
     this.stats.frameTime = performance.now() - frameStartTime;
     this.stats.fps = 1000 / this.stats.frameTime;
@@ -381,9 +336,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Removes all event listeners added by the application
-   */
   private removeEventListeners(): void {
     window.removeEventListener("resize", () => {
       const width = window.innerWidth;
@@ -396,9 +348,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Disposes of all core managers
-   */
   private disposeManagers(): void {
     // Dispose of renderer
     if (this.renderer) {
@@ -419,9 +368,6 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     // this.assetLoader.clearCache();
   }
 
-  /**
-   * Disposes of optional systems like physics and networking
-   */
   private disposeOptionalSystems(): void {
     // Dispose of physics world if it exists
     if (this.physicsWorld) {
@@ -434,18 +380,10 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Gets the current performance statistics
-   * @returns Object containing FPS, frame time, and physics time
-   */
   public getStats() {
     return { ...this.stats };
   }
 
-  /**
-   * Sets the target FPS for the application
-   * @param fps Target frames per second
-   */
   public setTargetFPS(fps: number): void {
     this.targetFPS = fps;
     this.fpsInterval = 1000 / fps;

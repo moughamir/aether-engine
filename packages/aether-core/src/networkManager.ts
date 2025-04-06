@@ -1,28 +1,20 @@
-import { io, Socket } from 'socket.io-client';
-import { ErrorType, MessageType, NetworkMessage, tryCatchAsync, type Lifecycle } from '@aether/shared';
-import EventEmitter from 'eventemitter3';
+import { io, Socket } from "socket.io-client";
+import {
+  ErrorType,
+  MessageType,
+  NetworkMessage,
+  tryCatchAsync,
+  type Lifecycle,
+} from "@aether/shared";
+import EventEmitter from "eventemitter3";
 
-import { EventRegistry } from '../../utils/EventRegistry';
-import { ResourcePool } from '../../utils/ResourcePool';
-
-export interface NetworkOptions {
-  url: string;
-  autoConnect?: boolean;
-  auth?: Record<string, any>;
-  reconnect?: {
-    maxAttempts?: number;
-    baseDelay?: number;
-    exponentialBackoff?: boolean;
-  };
-  messageBuffering?: {
-    enabled?: boolean;
-    maxSize?: number;
-  };
-}
+import { EventRegistry } from "./eventRegistry";
+import { ResourcePool } from "./resourcePool";
+import type { NetworkOptions } from "./types";
 
 // Add a message buffer for offline scenarios
-class MessageBuffer<T> {
-  private messages: Array<{type: MessageType, data: T}> = [];
+export class MessageBuffer<T> {
+  private messages: Array<{ type: MessageType; data: T }> = [];
   private maxSize: number;
 
   constructor(maxSize = 100) {
@@ -30,14 +22,14 @@ class MessageBuffer<T> {
   }
 
   add(type: MessageType, data: T): void {
-    this.messages.push({type, data});
+    this.messages.push({ type, data });
     if (this.messages.length > this.maxSize) {
       this.messages.shift();
     }
   }
 
   flush(sendFn: (type: MessageType, data: T) => void): void {
-    this.messages.forEach(({type, data}) => sendFn(type, data));
+    this.messages.forEach(({ type, data }) => sendFn(type, data));
     this.clear();
   }
 
@@ -58,8 +50,8 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
     super();
 
     this.options = options || {
-      url: 'http://localhost:3000',
-      autoConnect: false
+      url: "http://localhost:3000",
+      autoConnect: false,
     };
 
     if (this.options.autoConnect) {
@@ -76,9 +68,6 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Set the server URL for the socket connection
-   */
   public setServerUrl(url: string): void {
     this.options.url = url;
 
@@ -89,9 +78,6 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
     }
   }
 
-  /**
-   * Connect to the server
-   */
   public async start(): Promise<void> {
     return this.connect();
   }
@@ -109,50 +95,47 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
         return new Promise<void>((resolve, reject) => {
           this.socket = io(this.options.url, {
             autoConnect: true,
-            auth: this.options.auth
+            auth: this.options.auth,
           });
 
           // Reattach all event listeners to the new socket
           this.reattachEventListeners();
 
           // Add this after successful connection:
-          this.socket.on('connect', () => {
+          this.socket.on("connect", () => {
             this.isConnected = true;
-            this.emit('connected');
+            this.emit("connected");
             this.flushMessageBuffer();
             resolve();
           });
 
-          this.socket.on('disconnect', (reason) => {
+          this.socket.on("disconnect", (reason) => {
             this.isConnected = false;
-            this.emit('disconnected', reason);
+            this.emit("disconnected", reason);
           });
 
-          this.socket.on('connect_error', (error) => {
+          this.socket.on("connect_error", (error) => {
             if (!this.isConnected) {
               reject(error);
             }
-            this.emit('error', error);
+            this.emit("error", error);
           });
         });
       },
       ErrorType.NETWORK,
-      'Failed to connect to server'
+      "Failed to connect to server"
     );
 
     if (!result.success) throw result.error;
   }
 
-  /**
-   * Disconnect from the server
-   */
   public stop(): void {
     this.disconnect();
   }
 
   public disconnect(): void {
     if (this.socket) {
-      this.eventRegistry.remove('*', undefined, (type, wrapper) =>
+      this.eventRegistry.remove("*", undefined, (type, wrapper) =>
         this.socket?.off(type, wrapper as any)
       );
 
@@ -168,12 +151,12 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
         this.messageBuffer.add(type, data);
         return;
       }
-      console.warn('Cannot send message: not connected');
+      console.warn("Cannot send message: not connected");
       return;
     }
 
     // Use resource pool for message object to reduce GC pressure
-    const message = ResourcePool.acquire<NetworkMessage<T>>('NetworkMessage');
+    const message = ResourcePool.acquire<NetworkMessage<T>>("NetworkMessage");
     message.type = type;
     message.data = data;
     message.timestamp = Date.now();
@@ -185,7 +168,7 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
     this.stats.bytesTransferred += JSON.stringify(message).length;
 
     // Return message to pool after sending
-    ResourcePool.release('NetworkMessage', message);
+    ResourcePool.release("NetworkMessage", message);
   }
 
   // Add method to flush buffered messages
@@ -196,18 +179,14 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
   }
 
   public onMessage<T>(type: MessageType, callback: (data: T) => void): void {
-    this.eventRegistry.add(
-      type.toString(),
-      callback,
-      (t, wrapper) => this.socket?.on(t, wrapper as any)
+    this.eventRegistry.add(type.toString(), callback, (t, wrapper) =>
+      this.socket?.on(t, wrapper as any)
     );
   }
 
   public offMessage(type: MessageType, callback?: Function): void {
-    this.eventRegistry.remove(
-      type.toString(),
-      callback,
-      (t, wrapper) => this.socket?.off(t, wrapper as any)
+    this.eventRegistry.remove(type.toString(), callback, (t, wrapper) =>
+      this.socket?.off(t, wrapper as any)
     );
   }
 
@@ -215,8 +194,8 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
     const maxAttempts = this.options.reconnect?.maxAttempts ?? 5;
     const baseDelay = this.options.reconnect?.baseDelay ?? 1000;
 
-    this.socket?.on('disconnect', (reason) => {
-      if (reason === 'io server disconnect') {
+    this.socket?.on("disconnect", (reason) => {
+      if (reason === "io server disconnect") {
         if (this.reconnectAttempts < maxAttempts) {
           setTimeout(() => {
             this.socket?.connect();
@@ -229,8 +208,8 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
 
   private reattachEventListeners(): void {
     if (!this.socket) return;
-    this.eventRegistry.reattachAll(
-      (type, wrapper) => this.socket?.on(type, wrapper as any)
+    this.eventRegistry.reattachAll((type, wrapper) =>
+      this.socket?.on(type, wrapper as any)
     );
   }
 
@@ -244,7 +223,7 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
     messagesSent: 0,
     messagesReceived: 0,
     bytesTransferred: 0,
-    lastLatency: 0
+    lastLatency: 0,
   };
 
   public getStats(): Readonly<typeof this.stats> {
@@ -260,7 +239,7 @@ export class NetworkManager extends EventEmitter implements Lifecycle {
       }
 
       const start = performance.now();
-      this.socket!.emit('ping', () => {
+      this.socket!.emit("ping", () => {
         const latency = performance.now() - start;
         this.stats.lastLatency = latency;
         resolve(latency);

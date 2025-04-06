@@ -1,4 +1,4 @@
-import { throttle, invariant, debounce, memoize } from '@aether/shared';
+import { throttle, invariant, debounce, memoize } from "@aether/shared";
 
 /**
  * @deprecated Use the utilities from @aether/shared instead

@@ -1,18 +1,9 @@
 import * as THREE from "three";
-import { CameraManager } from "./CameraManager";
+import { CameraManager } from "./cameraManager";
 import { Lifecycle } from "@aether/shared";
-import { SceneOptions, type CameraOptions } from "../../contracts";
-import type { AetherApp } from "../../AetherApp"
 
-
-
-export interface FogOptions {
-  color?: THREE.ColorRepresentation;
-  density?: number;
-  near?: number;
-  far?: number;
-}
-
+import type { SceneOptions, FogOptions, CameraOptions } from "./types";
+import AetherApp from "./aetherApp";
 
 export class SceneManager implements Lifecycle {
   app: AetherApp;
@@ -29,25 +20,20 @@ export class SceneManager implements Lifecycle {
     this.setupDefaultLighting();
   }
 
-  /**
-   * Initializes the scene manager with the provided options
-   * @param options Scene configuration options
-   */
   public initialize(options?: SceneOptions): void {
     // Configure the scene with the provided options
     this.configureScene(options);
   }
 
-  /**
-   * Configures the scene with the provided options
-   * @param options Scene configuration options
-   */
   public configureScene(options?: SceneOptions): void {
     if (!options) return;
 
     // Set background if provided
     if (options.background) {
-      if (typeof options.background === 'string' || typeof options.background === 'number') {
+      if (
+        typeof options.background === "string" ||
+        typeof options.background === "number"
+      ) {
         this.setBackgroundColor(options.background);
       } else {
         this.setBackground(options.background);
@@ -60,30 +46,18 @@ export class SceneManager implements Lifecycle {
     }
   }
 
-  /**
-   * Get the current scene
-   */
   public getScene(): THREE.Scene {
     return this.scene;
   }
 
-  /**
-   * Set the background color of the scene
-   */
   public setBackgroundColor(color: string | number): void {
     this.scene.background = new THREE.Color(color);
   }
 
-  /**
-   * Set the background of the scene (can be a texture or color)
-   */
   public setBackground(background: THREE.Color | THREE.Texture): void {
     this.scene.background = background;
   }
 
-  /**
-   * Set the fog in the scene
-   */
   public setFog(options: FogOptions): void {
     const color =
       options.color !== undefined
@@ -99,9 +73,6 @@ export class SceneManager implements Lifecycle {
     }
   }
 
-  /**
-   * Setup camera based on provided options
-   */
   public setupCamera(options: CameraOptions): void {
     const aspect = window.innerWidth / window.innerHeight;
     let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
@@ -118,13 +89,10 @@ export class SceneManager implements Lifecycle {
     this.cameraManager.setActiveCamera(camera);
   }
 
-  /**
-   * Creates a perspective camera with the given options
-   * @param options Camera configuration options
-   * @param aspect Aspect ratio for the camera
-   * @returns Configured perspective camera
-   */
-  private createPerspectiveCamera(options: CameraOptions, aspect: number): THREE.PerspectiveCamera {
+  private createPerspectiveCamera(
+    options: CameraOptions,
+    aspect: number
+  ): THREE.PerspectiveCamera {
     return new THREE.PerspectiveCamera(
       options.fov || 75,
       aspect,
@@ -133,12 +101,9 @@ export class SceneManager implements Lifecycle {
     );
   }
 
-  /**
-   * Creates an orthographic camera with the given options
-   * @param options Camera configuration options
-   * @returns Configured orthographic camera
-   */
-  private createOrthographicCamera(options: CameraOptions): THREE.OrthographicCamera {
+  private createOrthographicCamera(
+    options: CameraOptions
+  ): THREE.OrthographicCamera {
     return new THREE.OrthographicCamera(
       -1,
       1,
@@ -149,12 +114,10 @@ export class SceneManager implements Lifecycle {
     );
   }
 
-  /**
-   * Sets up the camera position and orientation
-   * @param camera Camera to configure
-   * @param options Camera configuration options
-   */
-  private setupCameraPosition(camera: THREE.Camera, options: CameraOptions): void {
+  private setupCameraPosition(
+    camera: THREE.Camera,
+    options: CameraOptions
+  ): void {
     // Set camera position if provided
     if (options.position) {
       camera.position.set(
@@ -187,10 +150,6 @@ export class SceneManager implements Lifecycle {
     this.scene.add(directionalLight);
   }
 
-  /**
-   * Renders the scene using the provided renderer
-   * @param renderer WebGL renderer to use for rendering
-   */
   public render(renderer: THREE.WebGLRenderer): void {
     if (!this.isRunning) return;
 
@@ -201,10 +160,6 @@ export class SceneManager implements Lifecycle {
     this.cameraManager.updateAspect(aspect);
   }
 
-  /**
-   * Starts the scene manager
-   * Implements the Startable interface
-   */
   public async start(): Promise<void> {
     if (this.isRunning) return Promise.resolve();
 
@@ -215,10 +170,6 @@ export class SceneManager implements Lifecycle {
     return Promise.resolve();
   }
 
-  /**
-   * Stops the scene manager
-   * Implements the Startable interface
-   */
   public stop(): void {
     if (!this.isRunning) return;
 
@@ -228,10 +179,6 @@ export class SceneManager implements Lifecycle {
     this.isRunning = false;
   }
 
-  /**
-   * Disposes of all resources used by the scene manager
-   * Implements the Disposable interface
-   */
   public dispose(): void {
     // Stop the scene manager if it's running
     if (this.isRunning) {
