@@ -1,5 +1,5 @@
 import { EntityManager } from '@aether/core';
-import { Vector3 } from '@aether/shared/math';
+import { Vector3, Quaternion } from '@aether/shared/math';
 
 const em = new EntityManager();
 
