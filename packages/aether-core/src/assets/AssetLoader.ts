@@ -2,11 +2,13 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import EventEmitter from 'eventemitter3';
+import { AssetType, LoadingStrategy } from '../contracts';
+
 
 export interface AssetLoaderOptions {
   baseUrl?: string;
   preload?: string[];
-  loadingStrategy?: 'eager' | 'lazy' | 'progressive';
+  loadingStrategy?: LoadingStrategy;
   cacheAssets?: boolean;
   maxRetries?: number;
   dracoDecoderPath?: string;
@@ -28,7 +30,7 @@ export class AssetLoader extends EventEmitter {
   private audioLoader: THREE.AudioLoader;
   private loadingManager: THREE.LoadingManager;
   private baseUrl: string = '';
-  private loadingStrategy: 'eager' | 'lazy' | 'progressive' = 'eager';
+  private loadingStrategy: LoadingStrategy = 'eager';
   private cacheAssets: boolean = true;
   private maxRetries: number = 3;
   private cache: AssetCache = {
@@ -114,7 +116,7 @@ export class AssetLoader extends EventEmitter {
    * Set the loading strategy for assets
    * @param strategy The loading strategy to use
    */
-  public setLoadingStrategy(strategy: 'eager' | 'lazy' | 'progressive'): void {
+  public setLoadingStrategy(strategy: LoadingStrategy): void {
     this.loadingStrategy = strategy;
   }
 
@@ -130,7 +132,7 @@ export class AssetLoader extends EventEmitter {
    * Clear the asset cache
    * @param type Optional asset type to clear, or all types if not specified
    */
-  public clearCache(type?: 'texture' | 'model' | 'audio'): void {
+  public clearCache(type?: AssetType): void {
     if (!type) {
       // Clear all caches
       this.cache.textures.clear();

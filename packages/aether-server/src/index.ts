@@ -1,54 +1,31 @@
-import express, { Express } from 'express';
-import http from 'http';
-import cors from 'cors';
-import { Server } from 'socket.io';
-import { createClient } from '@supabase/supabase-js';
-import Redis from 'ioredis';
-import dotenv from 'dotenv';
-
-import { GameServer } from './GameServer';
-
-// Load environment variables
+import express, { Express } from "express";
+import http from "http";
+import cors from "cors";
+import { Server } from "socket.io";
+import { createClient } from "@supabase/supabase-js";
+import Redis from "ioredis";
+import dotenv from "dotenv";
+import { GameServer } from "./GameServer";
 dotenv.config();
-
-// Create Express app
 const app: Express = express();
 app.use(cors());
 app.use(express.json());
-
-// Create HTTP server
 const server = http.createServer(app);
-
-// Create Socket.IO server
 const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
+  cors: { origin: "*", methods: ["GET", "POST"] },
 });
-
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Initialize Redis client
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-const redis = new Redis(redisUrl);
-
-// Create game server
-const gameServer = new GameServer(io, supabase, redis);
-
-// API routes
-app.get('/health', (_req: express.Request, res: express.Response) => {
-  res.json({ status: 'ok' });
+const supabase = createClient(
+  process.env.SUPABASE_URL || "",
+  process.env.SUPABASE_KEY || ""
+);
+const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+const gameServer = new GameServer(io, supabase, redis, {
+  tickRate: 30,
 });
-
-// Start server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Aether server running on port ${PORT}`);
+app.get("/health", (_req: express.Request, res: express.Response) =>
+  res.json({ status: "ok" })
+);
+server.listen(process.env.PORT || 3301, () => {
+  console.log(`Aether server running on port ${process.env.PORT || 3301}`);
 });
-
-// Export for potential programmatic usage
 export { app, server, io, supabase, redis, gameServer };

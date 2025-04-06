@@ -1,20 +1,18 @@
-import { Server } from 'socket.io';
-import { SupabaseClient } from '@supabase/supabase-js';
-import Redis from 'ioredis';
-import { RoomManager } from './RoomManager';
-import { EntityManager } from './EntityManager';
+import { Server } from "socket.io";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Redis from "ioredis";
+import { RoomManager } from "./RoomManager";
+import { EntityManager } from "./EntityManager";
 
 export interface GameServerOptions {
   tickRate?: number;
 }
 
-// Add proper redis usage
 export class GameServer {
   private roomManager: RoomManager;
   private entityManager: EntityManager;
   private tickRate: number;
   private isRunning = false;
-
 
   constructor(
     io: Server,
@@ -26,10 +24,6 @@ export class GameServer {
     this.roomManager = new RoomManager(io, redis);
     this.entityManager = new EntityManager(supabase, redis);
   }
-
-
-
-
 
   async startGameLoop() {
     this.isRunning = true;
@@ -44,16 +38,16 @@ export class GameServer {
           await this.entityManager.processPhysics(roomStates);
           this.roomManager.broadcastStates(roomStates);
         } catch (physicsError) {
-          console.error('Physics processing error:', physicsError);
+          console.error("Physics processing error:", physicsError);
         }
 
         const processingTime = Date.now() - startTime;
-        await new Promise(resolve =>
+        await new Promise((resolve) =>
           setTimeout(resolve, Math.max(tickInterval - processingTime, 0))
         );
       }
     } catch (error) {
-      console.error('Game loop fatal error:', error);
+      console.error("Game loop fatal error:", error);
       this.shutdown();
     }
   }
@@ -61,10 +55,9 @@ export class GameServer {
   shutdown() {
     this.isRunning = false;
     try {
-
       this.redis.quit();
     } catch (redisError) {
-      console.error('Redis shutdown error:', redisError);
+      console.error("Redis shutdown error:", redisError);
     }
   }
 }

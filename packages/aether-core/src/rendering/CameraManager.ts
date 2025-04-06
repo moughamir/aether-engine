@@ -1,38 +1,57 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { CameraOptions, CameraViewType } from '../contracts';
+import { Lifecycle } from '@aether/shared';
 
-export type CameraType = 'perspective' | 'orthographic';
+export class CameraManager implements Lifecycle {
 
-export interface CameraOptions {
-  type?: CameraType;
-  fov?: number;
-  aspect?: number;
-  near?: number;
-  far?: number;
-  position?: THREE.Vector3;
-  lookAt?: THREE.Vector3;
-  enableControls?: boolean;
-}
-
-export class CameraManager {
   public activeCamera: THREE.Camera;
   public perspectiveCamera: THREE.PerspectiveCamera;
   public orthographicCamera: THREE.OrthographicCamera;
   public controls: OrbitControls | null = null;
 
+  private options: CameraOptions;
+  private isRunning: boolean = false;
+
   constructor(options: CameraOptions = {}) {
-    // Create perspective camera
-    this.perspectiveCamera = new THREE.PerspectiveCamera(
+    this.options = options;
+
+    // Create cameras
+    this.perspectiveCamera = this.createPerspectiveCamera(options);
+    this.orthographicCamera = this.createOrthographicCamera(options);
+
+    // Set active camera based on options
+    this.activeCamera = options.type === 'orthographic'
+      ? this.orthographicCamera
+      : this.perspectiveCamera;
+
+    // Set initial position and orientation
+    this.setupCameraPosition(this.activeCamera, options);
+  }
+
+  /**
+   * Creates a perspective camera with the given options
+   * @param options Camera configuration options
+   * @returns Configured perspective camera
+   */
+  private createPerspectiveCamera(options: CameraOptions): THREE.PerspectiveCamera {
+    return new THREE.PerspectiveCamera(
       options.fov || 75,
       options.aspect || window.innerWidth / window.innerHeight,
       options.near || 0.1,
       options.far || 1000
     );
+  }
 
-    // Create orthographic camera
+  /**
+   * Creates an orthographic camera with the given options
+   * @param options Camera configuration options
+   * @returns Configured orthographic camera
+   */
+   private createOrthographicCamera(options: CameraOptions): THREE.OrthographicCamera {
     const aspect = options.aspect || window.innerWidth / window.innerHeight;
     const frustumSize = 10;
-    this.orthographicCamera = new THREE.OrthographicCamera(
+    return new THREE.OrthographicCamera(
       frustumSize * aspect / -2,
       frustumSize * aspect / 2,
       frustumSize / 2,
@@ -40,32 +59,32 @@ export class CameraManager {
       options.near || 0.1,
       options.far || 1000
     );
+  }
 
-    // Set active camera based on options
-    this.activeCamera = options.type === 'orthographic'
-      ? this.orthographicCamera
-      : this.perspectiveCamera;
-
+  /**
+   * Sets up the camera position and orientation
+   * @param camera Camera to configure
+   * @param options Camera configuration options
+   */
+  private setupCameraPosition(camera: THREE.Camera, options: CameraOptions): void {
     // Set initial position
     if (options.position) {
-      this.activeCamera.position.copy(options.position);
+      camera.position.copy(options.position);
     } else {
-      this.activeCamera.position.set(0, 5, 10);
+      camera.position.set(0, 5, 10);
     }
 
     // Look at target
     if (options.lookAt) {
-      this.activeCamera.lookAt(options.lookAt);
+      camera.lookAt(options.lookAt);
     } else {
-      this.activeCamera.lookAt(0, 0, 0);
-    }
-
-    // Setup controls if enabled
-    if (options.enableControls) {
-      this.setupControls();
+      camera.lookAt(0, 0, 0);
     }
   }
 
+  /**
+   * Sets up camera controls
+   */
   private setupControls(): void {
     // We need a DOM element for controls, so we'll check if we're in a browser environment
     if (typeof document !== 'undefined') {
@@ -79,7 +98,7 @@ export class CameraManager {
    * Set the active camera
    * @param camera Camera object or camera type string
    */
-  public setActiveCamera(camera: THREE.Camera | CameraType): void {
+  public setActiveCamera(camera: THREE.Camera | CameraViewType): void {
     if (typeof camera === 'string') {
       // If a camera type string is provided
       this.activeCamera = camera === 'orthographic'
@@ -108,9 +127,52 @@ export class CameraManager {
     this.orthographicCamera.updateProjectionMatrix();
   }
 
+  /**
+   * Updates the camera controls
+   */
   public update(): void {
+    if (!this.isRunning) return;
+
     if (this.controls) {
       this.controls.update();
+    }
+  }
+
+  /**
+   * Starts the camera system
+   * Implements the Startable interface
+   */
+  public async start(): Promise<void> {
+    if (this.isRunning) return;
+
+    // Setup controls if enabled
+    if (this.options.enableControls) {
+      this.setupControls();
+    }
+
+    this.isRunning = true;
+    return Promise.resolve();
+  }
+
+  /**
+   * Stops the camera system
+   * Implements the Startable interface
+   */
+  public stop(): void {
+    this.isRunning = false;
+  }
+
+  /**
+   * Cleans up resources used by the camera system
+   * Implements the Disposable interface
+   */
+  public dispose(): void {
+    this.stop();
+
+    // Dispose of controls
+    if (this.controls) {
+      this.controls.dispose();
+      this.controls = null;
     }
   }
 }
