@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { CameraManager } from "./CameraManager";
 import { Lifecycle } from "@aether/shared";
 import { SceneOptions, type CameraOptions } from "../../contracts";
-import type AetherApp from "../../AetherApp"
+import type { AetherApp } from "../../AetherApp"
+
 
 
 export interface FogOptions {

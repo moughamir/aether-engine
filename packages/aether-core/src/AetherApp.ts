@@ -47,7 +47,7 @@ export class AetherApp extends EventEmitter implements Lifecycle {
     } catch (error) {
       throw createError(
         ErrorType.INITIALIZATION,
-        `Failed to initialize AetherApp: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to initialize AetherApp: ${error instanceof Error ? error.message : String(error)}`,__dirname,
         { options }
       );
     }
