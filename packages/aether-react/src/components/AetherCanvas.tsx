@@ -1,11 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from "react";
 
-import { useAether } from '../hooks/useAether';
-import type { AetherAppOptions } from '@aether/core/src/contracts'
-import { AetherApp } from '@aether/core/src/AetherApp'
+import { useAether } from "../hooks/useAether";
+import AetherApp from "@aether/core/src/aetherApp";
+import type { AetherAppOptions } from "@aether/core/src/types";
 
 export interface AetherCanvasProps {
-  options?: Omit<AetherAppOptions, 'canvas'>;
+  options?: Omit<AetherAppOptions, "canvas">;
   onReady?: (app: AetherApp) => void;
   className?: string;
   style?: React.CSSProperties;
@@ -15,7 +15,7 @@ export const AetherCanvas: React.FC<AetherCanvasProps> = ({
   options = {},
   onReady,
   className,
-  style
+  style,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { setApp } = useAether();
@@ -28,23 +28,25 @@ export const AetherCanvas: React.FC<AetherCanvasProps> = ({
     try {
       appInstance = new AetherApp({
         ...options,
-        canvas: canvasRef.current
+        canvas: canvasRef.current,
       });
 
-      setApp({ instance: appInstance, loadingState: 'initializing' });
+      setApp({ instance: appInstance, loadingState: "initializing" });
 
       appInstance.start();
-      setApp({ instance: appInstance, loadingState: 'loading-assets' });
+      setApp({ instance: appInstance, loadingState: "loading-assets" });
 
       if (onReady) onReady(appInstance);
-      setApp({ instance: appInstance, loadingState: 'ready' });
-
+      setApp({ instance: appInstance, loadingState: "ready" });
     } catch (error) {
-      console.error('AetherEngine initialization failed:', error);
+      console.error("AetherEngine initialization failed:", error);
       setApp({
         instance: null,
-        error: error instanceof Error ? error : new Error('Engine initialization failed'),
-        loadingState: 'error'
+        error:
+          error instanceof Error
+            ? error
+            : new Error("Engine initialization failed"),
+        loadingState: "error",
       });
     }
 
@@ -52,7 +54,7 @@ export const AetherCanvas: React.FC<AetherCanvasProps> = ({
       if (appInstance) {
         appInstance.dispose();
       }
-      setApp({ instance: null, loadingState: 'idle' });
+      setApp({ instance: null, loadingState: "idle" });
     };
   }, [options, onReady, setApp]);
 
@@ -61,10 +63,10 @@ export const AetherCanvas: React.FC<AetherCanvasProps> = ({
       ref={canvasRef}
       className={className}
       style={{
-        display: 'block',
-        width: '100%',
-        height: '100%',
-        ...style
+        display: "block",
+        width: "100%",
+        height: "100%",
+        ...style,
       }}
     />
   );
