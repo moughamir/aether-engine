@@ -1,5 +1,7 @@
 import React, { createContext, useState, useCallback, ReactNode } from 'react';
-import { AetherApp } from '@aether/core';
+import type { AetherApp } from '@aether/core/src/AetherApp'
+
+
 
 export type LoadingState = 'idle' | 'initializing' | 'loading-assets' | 'ready' | 'error';
 

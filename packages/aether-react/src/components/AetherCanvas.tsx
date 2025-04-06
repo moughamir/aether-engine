@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from 'react';
-import AetherApp, {type AetherAppOptions } from "@aether/core";
+
 import { useAether } from '../hooks/useAether';
+import type { AetherAppOptions } from '@aether/core/src/contracts'
+import { AetherApp } from '@aether/core/src/AetherApp'
 
 export interface AetherCanvasProps {
   options?: Omit<AetherAppOptions, 'canvas'>;
