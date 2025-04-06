@@ -1,0 +1,17 @@
+{
+  "name": "ecs-showcase",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@aether/core": "workspace:*",
+    "@aether/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "typescript": "5.3.3"
+  }
+}
